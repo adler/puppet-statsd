@@ -11,7 +11,15 @@ class statsd(
   $config           = { }) 
 inherits statsd::params {
 
-  require nodejs
+  #require nodejs
+
+  # added by Mike Adler - puppetlabs nodejs not workie
+  package { 'nodejs':
+    provider => rpm,
+    source => 'http://cobbler.ewr.huffpo.net/IMAGE/nodejs-0.8.23-1.el6.x86_64.rpm',
+    ensure => '0.8.23-1.el6',
+    before => Package['statsd'],
+  }
 
   package { 'statsd':
     ensure   => $ensure,
@@ -63,6 +71,14 @@ inherits statsd::params {
     group   => 'root',
     mode    => '0755',
     notify  => Service['statsd'],
+  }
+
+  # added by Mike Adler - statsd would fail to load graphite.js
+  $mod_dir = '/usr/lib/node_modules/statsd'
+  file { "$mod_dir/node_modules/graphite.js" :
+    ensure => link,
+    target => "$mod_dir/backends/graphite.js",
+    before => Service['statsd'],
   }
 
   service { 'statsd':
