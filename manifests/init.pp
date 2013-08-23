@@ -73,14 +73,6 @@ inherits statsd::params {
     notify  => Service['statsd'],
   }
 
-  # added by Mike Adler - statsd would fail to load graphite.js
-  $mod_dir = '/usr/lib/node_modules/statsd'
-  file { "$mod_dir/node_modules/graphite.js" :
-    ensure => link,
-    target => "$mod_dir/backends/graphite.js",
-    before => Service['statsd'],
-  }
-
   service { 'statsd':
     ensure    => running,
     enable    => true,
